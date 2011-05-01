@@ -1,7 +1,8 @@
 """
 Utilities for syncing and archiving directory trees.
 """
-import hashlib
+import hashlib, os, re
+from os.path import exists, join, relpath
 import ctypes as ct
 
 def hexdigest(f, block_size=2**20, fn="md5"):
@@ -28,6 +29,48 @@ def hexdigest(f, block_size=2**20, fn="md5"):
         fn.update(data)
     return fn.hexdigest()
 
+excludeTypes = [
+    ".svn",
+    ".git" ]
+excludePatterns = [
+    "\.svn",
+    ".*\.pyc",
+    ".*\.o",
+    ".*\.a",
+    ".*~",
+    "\.#.*",
+    "\.DS_Store"]
+
+def index_tree(root, f, exptrn=None, exdirs=None, expath=None):
+    """
+    Indexes all files in a directory tree to a text file. One file per line.
+
+    Inputs:
+    - root: the root path to start indexing at.
+    - f: filename of file handle to an output text file.
+    - exptrn: list of regex patterns to exclude (will be enclosed in ^$).
+    - exdirs: ['.svn', '.git'] directory types to exclude.
+    - expath: list of paths (relative to root) to exclude.
+    """
+    if type(f) == type(str()):
+        f = open(f, "wt")
+    excludePattern = "|".join(map(lambda s: "^%s$" % s,
+                                  excludePatterns + (exptrn or [])))
+    excludeDirs = excludeTypes + (exdirs or [])
+    root = os.path.abspath(root)
+    for dirpath, dirs, files in os.walk(root):
+        # write files to output
+        for filename in files:
+            if re.search(excludePattern, filename): continue
+            f.write(join(dirpath, filename) + "\n")
+        # exclude certain directory patterns or types
+        for dname in list(dirs):
+            print join(dirpath, dname)
+            if re.search(excludePattern, dname) \
+                   or any([exists(join(dirpath, dname, tname)) \
+                           for tname in excludeDirs]) \
+                   or relpath(join(dirpath, dname), root) in (expath or []):
+                dirs.remove(dname)
 
 class struct_timespec(ct.Structure):
     _fields_ = [('tv_sec', ct.c_long), ('tv_nsec', ct.c_long)]
