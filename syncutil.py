@@ -5,7 +5,7 @@ import hashlib, os, re
 from os.path import exists, join, relpath
 import ctypes as ct
 
-def hexdigest(f, block_size=2**20, fn="md5"):
+def hexdigest(f, blocksize=2**20, fn="md5"):
     """
     Calculates a hex digest on a file in a memory efficient way.
     
@@ -23,7 +23,7 @@ def hexdigest(f, block_size=2**20, fn="md5"):
         f = open(f, 'rb')
     fn = getattr(hashlib, fn)()
     while True:
-        data = f.read(block_size)
+        data = f.read(blocksize)
         if not data:
             break
         fn.update(data)
