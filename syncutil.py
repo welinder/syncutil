@@ -72,6 +72,24 @@ def index_tree(root, f, exptrn=None, exdirs=None, expath=None):
                    or relpath(join(dirpath, dname), root) in (expath or []):
                 dirs.remove(dname)
 
+def line_count(f, blocksize=2**20):
+    """
+    Fast and memory-efficient line count of a text file.
+
+    Inputs:
+    - f: filename or file handle.
+    - blocksize: [2**20] size of blocks to read into memory.
+    """
+    if type(f) == type(str()):
+        f = open(f, 'rt')
+    lines = 0
+    read_f = f.read # loop optimization
+    buf = read_f(blocksize)
+    while buf:
+        lines += buf.count('\n')
+        buf = read_f(blocksize)
+    return lines
+
 class struct_timespec(ct.Structure):
     _fields_ = [('tv_sec', ct.c_long), ('tv_nsec', ct.c_long)]
 
