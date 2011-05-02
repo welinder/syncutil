@@ -59,19 +59,21 @@ def index_tree(root, f, exptrn=None, exdirs=None, expath=None):
     excludeDirs = excludeTypes + (exdirs or [])
     root = os.path.abspath(root)
     for dirpath, dirs, files in os.walk(root):
+        rpath = relpath(dirpath, root)
+        if rpath == ".": rpath = ''
         # write files to output
         for filename in files:
             if re.search(excludePattern, filename): continue
-            f.write(join(dirpath, filename) + "\n")
+            f.write(join(rpath, filename) + "\n")
         # exclude certain directory patterns or types
         for dname in list(dirs):
-            print join(dirpath, dname)
+            rdir = join(rpath, dname)
             if re.search(excludePattern, dname) \
                    or any([exists(join(dirpath, dname, tname)) \
                            for tname in excludeDirs]) \
-                   or relpath(join(dirpath, dname), root) in (expath or []):
+                   or rdir in (expath or []):
                 dirs.remove(dname)
-
+                
 def line_count(f, blocksize=2**20):
     """
     Fast and memory-efficient line count of a text file.
