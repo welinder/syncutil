@@ -39,6 +39,8 @@ excludePatterns = [
     ".*\.a",
     ".*~",
     "\.#.*",
+    "\.aux",
+    "\.dropbox\.cache",
     "\.DS_Store"]
 
 def index_tree(root, f, exptrn=None, exdirs=None, expath=None):
