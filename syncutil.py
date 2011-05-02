@@ -1,7 +1,7 @@
 """
 Utilities for syncing and archiving directory trees.
 """
-import hashlib, os, re
+import hashlib, os, re, codecs
 from os.path import exists, join, relpath
 import ctypes as ct
 
@@ -34,6 +34,7 @@ excludeTypes = [
     ".git" ]
 excludePatterns = [
     "\.svn",
+    "\.git",
     ".*\.pyc",
     ".*\.o",
     ".*\.a",
@@ -55,7 +56,7 @@ def index_tree(root, f, exptrn=None, exdirs=None, expath=None):
     - expath: list of paths (relative to root) to exclude.
     """
     if type(f) == type(str()):
-        f = open(f, "w")
+        f = codecs.open(f, "w", 'utf-8')
     excludePattern = "|".join(map(lambda s: "^%s$" % s,
                                   excludePatterns + (exptrn or [])))
     excludeDirs = excludeTypes + (exdirs or [])
@@ -66,7 +67,8 @@ def index_tree(root, f, exptrn=None, exdirs=None, expath=None):
         # write files to output
         for filename in files:
             if re.search(excludePattern, filename): continue
-            f.write(join(rpath, filename) + "\n")
+            line = join(rpath, filename) + "\n"
+            f.write(line.decode('utf-8'))
         # exclude certain directory patterns or types
         for dname in list(dirs):
             rdir = join(rpath, dname)
@@ -82,7 +84,7 @@ def inspect_tree(filename, target, root=None, repstep=1000, digest='sha1'):
     """
     root = root or os.path.abspath('.')
     count = line_count(filename)
-    f = open(target, 'w')
+    f = codecs.open(target, 'w', 'utf-8')
     for lino, line in enumerate(open(filename)):
         fn = line.rstrip()
         fpath = join(root, fn)
@@ -96,7 +98,8 @@ def inspect_tree(filename, target, root=None, repstep=1000, digest='sha1'):
         # write file info
         row = ['"%s"' % fn, h, stat.st_size, btime,
                int(stat.st_atime), int(stat.st_mtime), int(stat.st_ctime)]
-        f.write(",".join([str(c) for c in row]) + "\n")
+        out = ",".join([str(c) for c in row]) + "\n"
+        f.write(out.decode("utf-8"))
         # report progress
         if (lino+1) % repstep == 0:
             print "File %d/%d." % (lino+1, count)
