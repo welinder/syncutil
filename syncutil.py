@@ -73,7 +73,30 @@ def index_tree(root, f, exptrn=None, exdirs=None, expath=None):
                            for tname in excludeDirs]) \
                    or rdir in (expath or []):
                 dirs.remove(dname)
-                
+
+def inspect_tree(filename, target, root=None, repstep=1000, digest='sha1'):
+    """
+    Gathers information about a directory tree.
+    """
+    root = root or os.path.abspath('.')
+    count = line_count(filename)
+    f = open(target, 'wt')
+    for lino, line in enumerate(open(filename)):
+        fn = line.rstrip()
+        fpath = join(root, fn)
+        # collect file info
+        h = hexdigest(fpath, fn=digest)
+        stat = os.stat(fpath)
+        btime = get_creation_time(fpath)
+        # write file info
+        row = ['"%s"' % fn, h, stat.st_size, btime,
+               int(stat.st_atime), int(stat.st_mtime), int(stat.st_ctime)]
+        f.write(",".join([str(c) for c in row]) + "\n")
+        # report progress
+        if (lino+1) % repstep == 0:
+            print "File %d/%d." % (lino+1, count)
+    f.close()
+
 def line_count(f, blocksize=2**20):
     """
     Fast and memory-efficient line count of a text file.
