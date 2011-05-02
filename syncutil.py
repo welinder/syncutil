@@ -84,6 +84,9 @@ def inspect_tree(filename, target, root=None, repstep=1000, digest='sha1'):
     for lino, line in enumerate(open(filename)):
         fn = line.rstrip()
         fpath = join(root, fn)
+        if not exists(fpath):
+            print "- skip %s" % fn
+            continue
         # collect file info
         h = hexdigest(fpath, fn=digest)
         stat = os.stat(fpath)
