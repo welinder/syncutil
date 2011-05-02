@@ -55,7 +55,7 @@ def index_tree(root, f, exptrn=None, exdirs=None, expath=None):
     - expath: list of paths (relative to root) to exclude.
     """
     if type(f) == type(str()):
-        f = open(f, "wt")
+        f = open(f, "w")
     excludePattern = "|".join(map(lambda s: "^%s$" % s,
                                   excludePatterns + (exptrn or [])))
     excludeDirs = excludeTypes + (exdirs or [])
@@ -82,7 +82,7 @@ def inspect_tree(filename, target, root=None, repstep=1000, digest='sha1'):
     """
     root = root or os.path.abspath('.')
     count = line_count(filename)
-    f = open(target, 'wt')
+    f = open(target, 'w')
     for lino, line in enumerate(open(filename)):
         fn = line.rstrip()
         fpath = join(root, fn)
